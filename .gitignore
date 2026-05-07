@@ -46,4 +46,6 @@ app-example
 .firebase/
 firebase.json
 .firebaserc
+src/services/firebaseConfig.ts
+src/services/firebase*
 *.firebase.*
