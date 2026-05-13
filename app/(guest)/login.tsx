@@ -19,8 +19,9 @@ import {
 import { auth } from '../../src/services/firebaseConfig'; // Ensure this path matches your config
 import { useAuth } from '../../hooks/useAuth'; // Custom hook we discussed
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-export default function KhataPage() {
+export default function LoginPage() {
   const { user, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -28,6 +29,14 @@ export default function KhataPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (user) {
+      // replace ensures they can't 'go back' to the login screen
+      router.replace('/(main)/khata'); 
+    }
+  }, [user]);
 
   // --- Logic: Authentication Handler ---
   const handleAuth = async () => {
@@ -76,30 +85,7 @@ export default function KhataPage() {
   };
 
   // --- Loading State ---
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
-      </View>
-    );
-  }
-
-  // --- View: Logged In (Ledger View) ---
-  if (user) {
-    return (
-      <View style={styles.center}>
-        <Ionicons name="book-outline" size={64} color="#2563EB" />
-        <Text style={styles.title}>Welcome, {user.displayName || 'Reese'}</Text>
-        <Text style={styles.subtitle}>Your synced Khata ledger is active.</Text>
-        <TouchableOpacity 
-          style={[styles.primaryButton, { backgroundColor: '#EF4444', marginTop: 20 }]} 
-          onPress={() => auth.signOut()}
-        >
-          <Text style={styles.buttonText}>Sign Out</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#2563EB" /></View>;
 
   // --- View: Logged Out (Robust Auth Form) ---
   return (
@@ -197,7 +183,7 @@ export default function KhataPage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 25, backgroundColor: '#F8FAFC', justifyContent: 'center' },
+  container: { flexGrow: 1, padding: 25, backgroundColor: '#F8FAFC', justifyContent: 'center', paddingTop: 60 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' },
   headerSection: { alignItems: 'center', marginBottom: 30 },
   iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },

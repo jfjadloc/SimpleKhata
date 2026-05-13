@@ -55,7 +55,7 @@ export default function BillSplitterPage() {
   const decrement = () => setParticipantCount(prev => (prev > 2 ? prev - 1 : 2));
 
   // --- Logic ---
-  const grandTotal = bills.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0);
+  const grandTotal = bills.reduce((sum, bill) => sum + (bill.total || 0), 0);
   const totalPerPerson = participantCount > 0 
     ? grandTotal / participantCount 
     : 0;
@@ -76,7 +76,7 @@ export default function BillSplitterPage() {
         id: Date.now().toString(),
         description,
         total: totalValue,
-        perPerson: totalValue / parseInt(participantCount),
+        perPerson: totalValue / participantCount,
       };
       setBills([newItem, ...bills]);
       setDescription('');
@@ -95,9 +95,9 @@ export default function BillSplitterPage() {
   };
 
   const resetSession = () => {
-    setBills([]);
-    setParticipantCount('');
+    setParticipantCount(2); // Set to 2 (or your preferred default number)
     setIsSessionActive(false);
+    setBills([]); // Clear the list if needed
   };
 
   return (
@@ -148,13 +148,15 @@ export default function BillSplitterPage() {
               <View style={styles.inputCard}>
                 <TextInput 
                   style={styles.inputField} 
-                  placeholder="Expense Description" 
+                  placeholder="Expense Description"   
+                  placeholderTextColor="#94A3B8"
                   value={description}
                   onChangeText={setDescription}
                 />
                 <TextInput 
                   style={styles.inputField} 
                   placeholder="Total Amount (₱)" 
+                  placeholderTextColor="#94A3B8"
                   keyboardType="decimal-pad"
                   value={amount}
                   onChangeText={setAmount}
