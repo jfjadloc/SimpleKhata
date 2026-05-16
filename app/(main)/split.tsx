@@ -6,14 +6,15 @@ import {
   TouchableOpacity, 
   ScrollView, 
   StyleSheet,
-  Alert 
+  Alert,
+  Platform,
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
-// --- Interfaces ---
 interface BillItem {
   id: string;
   description: string;
@@ -21,31 +22,43 @@ interface BillItem {
   perPerson: number;
 }
 
-// --- Sub-Component: Landing Notice ---
+// --- Header Component (Logo & Title) ---
+const SplitterHeader = () => (
+  <View style={styles.appHeader}>
+    <View style={styles.logoContainer}>
+      <Image 
+        source={require('../../assets/images/SimpleKhata-icon.png')} 
+        style={styles.iconImage}
+        resizeMode="contain" 
+      />
+    </View>
+    <View>
+      <Text style={styles.appTitle}>Shared Expense Splitter</Text>
+      <Text style={styles.appSub}>A focused utility for instant bill distribution</Text>
+    </View>
+  </View>
+);
+
+// --- Sub-Component: How to use (Landing Notice) ---
 const LandingNotice = () => (
-  <View style={styles.noticeContainer}>
-    <View style={styles.headerRow}>
-      <Ionicons name="information-circle" size={20} color="#2563EB" />
-      <Text style={styles.noticeTitle}>Shared Expense Splitter</Text>
+  <View style={styles.howToUseCard}>
+    <View style={styles.howToHeader}>
+      <View style={styles.infoBadge}>
+        <Text style={styles.infoBadgeText}>i</Text>
+      </View>
+      <Text style={styles.howToTitle}>How to use</Text>
     </View>
-    <Text style={styles.tagline}>A focused utility for instant bill distribution.</Text>
-    <View style={styles.listContainer}>
-      <Text style={styles.listText}><Text style={styles.bold}>• Initialize Session:</Text> Set participants once.</Text>
-      <Text style={styles.listText}><Text style={styles.bold}>• Manual Entry:</Text> Record with full data control.</Text>
-      <Text style={styles.listText}><Text style={styles.bold}>• Instant Calculation:</Text> Automatic split results.</Text>
-    </View>
-    <View style={styles.footerNote}>
-      <Text style={styles.footerText}>
-        <Text style={{fontStyle: 'italic'}}>Note:</Text> This is for active calculation. For long-term tracking, use the <Text style={{color: '#2563EB', fontWeight: '700'}}>Khata</Text> tab.
-      </Text>
+    <View style={styles.howToList}>
+      <Text style={styles.howToItem}>• <Text style={styles.bold}>Initialize Session:</Text> Set participants once.</Text>
+      <Text style={styles.howToItem}>• <Text style={styles.bold}>Manual Entry:</Text> Record with full data control.</Text>
+      <Text style={styles.howToItem}>• <Text style={styles.bold}>Instant Calculation:</Text> Automatic split results.</Text>
     </View>
   </View>
 );
 
 export default function BillSplitterPage() {
-  // --- Refs & State ---
   const viewShotRef = useRef<any>(null);
-  const [participantCount, setParticipantCount] = useState(2); // Start with a sensible default
+  const [participantCount, setParticipantCount] = useState(2);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -54,19 +67,11 @@ export default function BillSplitterPage() {
   const increment = () => setParticipantCount(prev => prev + 1);
   const decrement = () => setParticipantCount(prev => (prev > 2 ? prev - 1 : 2));
 
-  // --- Logic ---
   const grandTotal = bills.reduce((sum, bill) => sum + (bill.total || 0), 0);
-  const totalPerPerson = participantCount > 0 
-    ? grandTotal / participantCount 
-    : 0;
+  const totalPerPerson = participantCount > 0 ? grandTotal / participantCount : 0;
 
   const handleStartSession = () => {
-    // Direct comparison works now
-    if (participantCount > 1) {
-        setIsSessionActive(true);
-    } else {
-        Alert.alert("Invalid Group", "Please enter at least 2 participants.");
-    }
+    if (participantCount > 1) setIsSessionActive(true);
   };
 
   const addSharedExpense = () => {
@@ -89,113 +94,128 @@ export default function BillSplitterPage() {
       const uri = await viewShotRef.current.capture();
       await Sharing.shareAsync(uri);
     } catch (error) {
-      console.error("Capture failed:", error);
       Alert.alert("Error", "Failed to generate image.");
     }
   };
 
   const resetSession = () => {
-    setParticipantCount(2); // Set to 2 (or your preferred default number)
+    setParticipantCount(2);
     setIsSessionActive(false);
-    setBills([]); // Clear the list if needed
+    setBills([]);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={{ flex: 1, backgroundColor: '#F9F9F9' }}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
+          <SplitterHeader />
+
           {!isSessionActive ? (
-            <View>
+            <View style={styles.landingContainer}>
               <LandingNotice />
-              <View style={styles.promptCard}>
-                <View style={styles.iconCircle}>
-                  <Ionicons name="people" size={40} color="#2563EB" />
-                </View>
-                <Text style={styles.promptTitle}>New Split Session</Text>
-                <Text style={styles.promptSub}>Define how many participants are sharing costs.</Text>
+              <View style={styles.centerSection}>
+                <Text style={styles.newSplitTitle}>New Split Session</Text>
+                <Text style={styles.newSplitSub}>Define how many participants are sharing costs</Text>
+                
                 <View style={styles.stepperContainer}>
-                  <TouchableOpacity style={styles.stepButton} onPress={decrement}>
-                    <Ionicons name="remove" size={32} color="#2563EB" />
+                  <TouchableOpacity style={styles.circleBtn} onPress={decrement}>
+                    <Ionicons name="remove" size={28} color="#000" />
                   </TouchableOpacity>
                   
-                  <View style={styles.numberDisplay}>
-                    <Text style={styles.hugeNumber}>{participantCount}</Text>
-                    <Text style={styles.label}>Participants</Text>
+                  <View style={styles.countDisplay}>
+                    <Text style={styles.hugeCount}>{participantCount}</Text>
+                    <Text style={styles.countLabel}>PARTICIPANTS</Text>
                   </View>
 
-                  <TouchableOpacity style={styles.stepButton} onPress={increment}>
-                    <Ionicons name="add" size={32} color="#2563EB" />
+                  <TouchableOpacity style={styles.circleBtn} onPress={increment}>
+                    <Ionicons name="add" size={28} color="#000" />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.primaryButton} onPress={handleStartSession}>
-                  <Text style={styles.buttonText}>Initialize Split</Text>
+
+                <TouchableOpacity style={styles.primaryBtn} onPress={handleStartSession}>
+                  <Text style={styles.primaryBtnText}>Set Group Size</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
-            <View>
-              <View style={styles.sessionHeader}>
-                <View>
-                  <Text style={styles.headerLabel}>Shared by</Text>
-                  <Text style={styles.headerValue}>{participantCount} Participants</Text>
+            <View style={styles.sessionContainer}>
+              {/* Active Participants Display */}
+              <View style={styles.activeParticipantsBox}>
+                <View style={styles.activeLeft}>
+                   <View style={styles.peopleIconCircle}>
+                      <Ionicons name="people-outline" size={20} color="#3B82F6" />
+                   </View>
+                   <View>
+                      <Text style={styles.activeLabel}>Shared by</Text>
+                      <Text style={styles.activeValue}>{participantCount} People</Text>
+                   </View>
                 </View>
-                <TouchableOpacity onPress={resetSession} style={styles.resetBtn}>
-                  <Text style={styles.resetText}>New Session</Text>
+                <TouchableOpacity onPress={resetSession}>
+                  <Ionicons name="trash" size={24} color="#C2410C" />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.inputCard}>
+              <View style={styles.inputSection}>
                 <TextInput 
-                  style={styles.inputField} 
+                  style={styles.textInput} 
                   placeholder="Expense Description"   
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#CBD5E1"
                   value={description}
                   onChangeText={setDescription}
                 />
                 <TextInput 
-                  style={styles.inputField} 
-                  placeholder="Total Amount (₱)" 
-                  placeholderTextColor="#94A3B8"
+                  style={styles.textInput} 
+                  placeholder="Total Amount" 
+                  placeholderTextColor="#CBD5E1"
                   keyboardType="decimal-pad"
                   value={amount}
                   onChangeText={setAmount}
                 />
-                <TouchableOpacity style={styles.addBtn} onPress={addSharedExpense}>
-                  <Ionicons name="add-circle" size={20} color="white" />
-                  <Text style={styles.addBtnText}>Record Shared Expense</Text>
+                <TouchableOpacity style={styles.primaryBtn} onPress={addSharedExpense}>
+                  <Text style={styles.primaryBtnText}>Record Shared Expense</Text>
                 </TouchableOpacity>
               </View>
 
+              {/* Expense Cards */}
               {bills.map((item) => (
-                <View key={item.id} style={styles.expenseItem}>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.expenseTitle}>{item.description}</Text>
-                    <Text style={styles.totalLabel}>Total: ₱{item.total.toLocaleString()}</Text>
+                <View key={item.id} style={styles.expenseCard}>
+                  <View>
+                    <Text style={styles.cardTitle}>{item.description}</Text>
+                    <Text style={styles.cardTotal}>Total: ₱{item.total.toLocaleString()}</Text>
                   </View>
-                  <View style={styles.splitResult}>
-                    <Text style={styles.perPersonLabel}>AMOUNT PER PERSON</Text>
-                    <Text style={styles.perPersonValue}>₱{item.perPerson.toLocaleString()}</Text>
+                  <View style={styles.cardRight}>
+                    <Text style={styles.cardPerPersonLabel}>Amount per person</Text>
+                    <Text style={styles.cardPerPersonValue}>₱{item.perPerson.toLocaleString()}</Text>
                   </View>
                 </View>
               ))}
 
+              {/* Computational Summary */}
               {bills.length > 0 && (
                 <View style={styles.summaryCard}>
                   <View style={styles.summaryHeader}>
-                    <Text style={styles.summaryTitle}>Session Summary</Text>
-                    <TouchableOpacity style={styles.shareButton} onPress={captureAndShare}>
-                      <Ionicons name="share-social" size={16} color="#059669" />
-                      <Text style={styles.shareText}>Share Image</Text>
+                    <Text style={styles.summaryTitle}>Computational Summary</Text>
+                    <TouchableOpacity style={styles.shareBtn} onPress={captureAndShare}>
+                      <Ionicons name="share-social" size={14} color="#000" />
+                      <Text style={styles.shareBtnText}>Share</Text>
                     </TouchableOpacity>
                   </View>
+                  
                   <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Grand Total:</Text>
-                    <Text style={styles.summaryValue}>₱{grandTotal.toLocaleString()}</Text>
+                    <Text style={styles.summaryValue}>₱ {grandTotal.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</Text>
                   </View>
-                  <View style={[styles.summaryRow, styles.mainRow]}>
-                    <Text style={styles.mainLabel}>Total per Participant:</Text>
-                    <Text style={styles.mainValue}>₱{totalPerPerson.toLocaleString()}</Text>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Group Size:</Text>
+                    <Text style={styles.summaryValue}>{participantCount} pax</Text>
+                  </View>
+                  
+                  <View style={styles.summaryDivider} />
+                  
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.totalPerPersonLabel}>Total per Participant</Text>
+                    <Text style={styles.totalPerPersonValue}>₱ {totalPerPerson.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</Text>
                   </View>
                 </View>
               )}
@@ -208,65 +228,103 @@ export default function BillSplitterPage() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F8FAFC' },
-  scrollContent: { paddingBottom: 40 },
+  safeArea: { flex: 1, backgroundColor: '#F9F9F9' },
+  scrollContent: { padding: 25, paddingBottom: 60 },
   
-  // Notice
-  noticeContainer: { backgroundColor: '#F0F7FF', borderRadius: 16, padding: 20, margin: 15, borderWidth: 1, borderColor: '#DBEAFE' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  noticeTitle: { fontSize: 17, fontWeight: '800', color: '#1E293B' },
-  tagline: { fontSize: 13, color: '#475569', marginBottom: 12 },
-  listContainer: { gap: 6, marginBottom: 12 },
-  listText: { fontSize: 12, color: '#334155' },
-  bold: { fontWeight: '700' },
-  footerNote: { borderTopWidth: 1, borderTopColor: '#DBEAFE', paddingTop: 10 },
-  footerText: { fontSize: 11, color: '#64748B' },
+  // App Logo Header
+  appHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30, marginTop: 15, justifyContent: 'space-between' },
+  logoContainer: { justifyContent: 'center', alignItems: 'center', },
+  iconImage: { width: 50, height: 50 },
+  appTitle: { fontSize: 18, fontWeight: '900', color: '#334155', textAlign: 'right' },
+  appSub: { fontSize: 10, color: '#64748B',  textAlign: 'right', marginTop: 5 },
 
-  // Prompt
-  promptCard: { alignItems: 'center', padding: 20 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  promptTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A' },
-  promptSub: { fontSize: 14, color: '#64748B', marginBottom: 20, textAlign: 'center' },
-  hugeInput: { fontSize: 64, fontWeight: 'bold', color: '#2563EB', textAlign: 'center', marginBottom: 30, width: '100%' },
-  primaryButton: { backgroundColor: '#2563EB', width: '90%', padding: 18, borderRadius: 12, alignItems: 'center' },
-  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  // How to Use Card
+  howToUseCard: { borderRadius: 10, padding: 20, marginBottom: 30, borderWidth: 1, borderColor: '#E2E8F0' },
+  howToHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  infoBadge: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#BFDBFE', justifyContent: 'center', alignItems: 'center' },
+  infoBadgeText: { color: '#2563EB', fontWeight: 'bold', fontSize: 12 },
+  howToTitle: { fontSize: 16, fontWeight: '900', color: '#000' },
+  howToList: { gap: 5 },
+  howToItem: { fontSize: 12, color: '#000', lineHeight: 18 },
+  bold: { fontWeight: 'bold' },
 
-  // Session
-  sessionHeader: { backgroundColor: '#FFF', padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  headerLabel: { fontSize: 11, color: '#64748B', textTransform: 'uppercase' },
-  headerValue: { fontSize: 20, fontWeight: '800', color: '#1E293B' },
-  resetBtn: { padding: 8 },
-  resetText: { color: '#2563EB', fontWeight: '600', fontSize: 12 },
-  inputCard: { backgroundColor: '#FFF', margin: 15, padding: 20, borderRadius: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
-  inputField: { borderBottomWidth: 1, borderBottomColor: '#F1F5F9', paddingVertical: 12, fontSize: 16, marginBottom: 10 },
-  addBtn: { backgroundColor: '#0F172A', padding: 15, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 10 },
-  addBtnText: { color: '#FFF', fontWeight: '700' },
-
-  // List
-  expenseItem: { backgroundColor: '#FFF', marginHorizontal: 15, marginBottom: 10, padding: 18, borderRadius: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderLeftWidth: 4, borderLeftColor: '#2563EB' },
-  expenseTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
-  totalLabel: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
-  splitResult: { alignItems: 'flex-end' },
-  perPersonLabel: { fontSize: 9, color: '#64748B', fontWeight: '800' },
-  perPersonValue: { fontSize: 18, fontWeight: '900', color: '#2563EB' },
-
-  // Summary
-  summaryCard: { backgroundColor: '#ECFDF5', margin: 15, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: '#D1FAE5', marginTop: 20 },
-  summaryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  summaryTitle: { fontSize: 18, fontWeight: '800', color: '#065F46' },
-  shareButton: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FFF', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20 },
-  shareText: { fontSize: 11, color: '#059669', fontWeight: '700' },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  mainRow: { borderTopWidth: 1, borderTopColor: '#D1FAE5', paddingTop: 15, marginTop: 5 },
-  summaryLabel: { color: '#065F46', fontSize: 14 },
-  summaryValue: { fontWeight: '700', color: '#065F46', fontSize: 14 },
-  mainLabel: { fontWeight: '800', color: '#065F46', fontSize: 15 },
-  mainValue: { fontWeight: '900', color: '#059669', fontSize: 24 },
+  // Landing Center Content
+  landingContainer: { flex: 1, justifyContent: 'center' },
+  centerSection: { alignItems: 'center', marginTop: 40 },
+  newSplitTitle: { fontSize: 24, fontWeight: '900', color: '#334155', marginBottom: 5 },
+  newSplitSub: { fontSize: 14, color: '#64748B', marginBottom: 20 },
 
   // Stepper
-  stepperContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 40, marginVertical: 40, },
-  stepButton: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#DBEAFE', },
-  numberDisplay: { alignItems: 'center', minWidth: 100, },
-  hugeNumber: { fontSize: 80, fontWeight: '900', color: '#0F172A', },
-  label: { fontSize: 14, color: '#64748B', fontWeight: '600', textTransform: 'uppercase', },
+  stepperContainer: { flexDirection: 'row', alignItems: 'center', gap: 40, marginBottom: 40 },
+  circleBtn: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E2E8F0', justifyContent: 'center', alignItems: 'center' },
+  countDisplay: { alignItems: 'center' },
+  hugeCount: { fontSize: 72, fontWeight: '900', color: '#000', lineHeight: 80 },
+  countLabel: { fontSize: 10, color: '#94A3B8', fontWeight: 'bold', letterSpacing: 1 },
+
+  // Buttons
+  primaryBtn: { backgroundColor: '#333344', width: '100%', padding: 18, borderRadius: 5, alignItems: 'center' },
+  primaryBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+
+  // Session Styles
+  sessionContainer: { width: '100%' },
+  activeParticipantsBox: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    padding: 15, 
+    borderRadius: 15, 
+    borderWidth: 1, 
+    borderColor: '#BFDBFE', 
+    borderStyle: 'dashed',
+    backgroundColor: '#EFF6FF',
+    marginBottom: 25
+  },
+  activeLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  peopleIconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#DBEAFE', justifyContent: 'center', alignItems: 'center' },
+  activeLabel: { fontSize: 12, color: '#64748B' },
+  activeValue: { fontSize: 18, fontWeight: '900', color: '#2563EB' },
+
+  inputSection: { marginBottom: 30 },
+  textInput: { borderBottomWidth: 1.5, borderBottomColor: '#E2E8F0', paddingVertical: 12, fontSize: 16, marginBottom: 20, color: '#334155' },
+
+  // Expense Card
+  expenseCard: { 
+    backgroundColor: '#FFF', 
+    borderRadius: 20, 
+    padding: 20, 
+    marginBottom: 15, 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.05, shadowRadius: 10 },
+      android: { elevation: 3 }
+    })
+  },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: '#000' },
+  cardTotal: { fontSize: 12, color: '#94A3B8' },
+  cardRight: { alignItems: 'flex-end' },
+  cardPerPersonLabel: { fontSize: 10, color: '#94A3B8' },
+  cardPerPersonValue: { fontSize: 18, fontWeight: '900', color: '#3B82F6' },
+
+  // Summary Card
+  summaryCard: { 
+    backgroundColor: '#F0FDF4', 
+    borderRadius: 15, 
+    padding: 20, 
+    marginTop: 20, 
+    borderWidth: 1, 
+    borderColor: '#4ADE80', 
+    borderStyle: 'dotted' 
+  },
+  summaryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  summaryTitle: { fontSize: 16, fontWeight: '900', color: '#000' },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#E2E8F0', paddingVertical: 5, paddingHorizontal: 12, borderRadius: 5 },
+  shareBtnText: { fontSize: 12, fontWeight: 'bold' },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  summaryLabel: { fontSize: 14, color: '#334155' },
+  summaryValue: { fontSize: 14, fontWeight: '700', color: '#000' },
+  summaryDivider: { height: 1, borderTopWidth: 1, borderTopColor: '#4ADE80', borderStyle: 'dashed', marginVertical: 12 },
+  totalPerPersonLabel: { fontSize: 14, fontWeight: '900', color: '#000' },
+  totalPerPersonValue: { fontSize: 16, fontWeight: '900', color: '#000' },
 });

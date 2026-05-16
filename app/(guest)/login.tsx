@@ -9,15 +9,16 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   updateProfile 
 } from 'firebase/auth';
-import { auth } from '../../src/services/firebaseConfig'; // Ensure this path matches your config
-import { useAuth } from '../../hooks/useAuth'; // Custom hook we discussed
+import { auth } from '../../src/services/firebaseConfig';
+import { useAuth } from '../../hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -29,18 +30,20 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Visibility Toggles
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  
   const router = useRouter();
 
   React.useEffect(() => {
     if (user) {
-      // replace ensures they can't 'go back' to the login screen
       router.replace('/(main)/khata'); 
     }
   }, [user]);
 
-  // --- Logic: Authentication Handler ---
   const handleAuth = async () => {
-    // Basic Validation
     if (!email || !password) {
       Alert.alert("Missing Fields", "Please fill in all required credentials.");
       return;
@@ -52,7 +55,7 @@ export default function LoginPage() {
         return;
       }
       if (displayName.trim().length < 2) {
-        Alert.alert("Invalid Name", "Please enter your full name for the ledger profile.");
+        Alert.alert("Invalid Name", "Please enter your full name.");
         return;
       }
     }
@@ -64,137 +67,172 @@ export default function LoginPage() {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        
-        // Update Firebase profile with the Display Name
-        await updateProfile(userCredential.user, {
-          displayName: displayName
-        });
-        
+        await updateProfile(userCredential.user, { displayName: displayName });
         Alert.alert("Success", `Welcome to Simple Khata, ${displayName}!`);
       }
     } catch (error: any) {
-      let errorMessage = "An error occurred during authentication.";
-      if (error.code === 'auth/email-already-in-use') errorMessage = "This email is already registered.";
-      if (error.code === 'auth/wrong-password') errorMessage = "Incorrect password.";
-      if (error.code === 'auth/user-not-found') errorMessage = "No account found with this email.";
-      
-      Alert.alert("Auth Error", errorMessage);
+      Alert.alert("Auth Error", error.message);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // --- Loading State ---
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#2563EB" /></View>;
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#10B981" /></View>;
 
-  // --- View: Logged Out (Robust Auth Form) ---
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: '#FFF' }}
     >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerSection}>
-          <View style={styles.iconCircle}>
-            <Ionicons name={isLogin ? "lock-open" : "person-add"} size={32} color="#2563EB" />
-          </View>
-          <Text style={styles.title}>{isLogin ? 'Welcome Back' : 'Join Simple Khata'}</Text>
-          <Text style={styles.subtitle}>
-            {isLogin 
-              ? 'Sign in to access your manual expense records.' 
-              : 'Create a profile to sync your debts across devices.'}
-          </Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* Logo Branding Section */}
+        <View style={styles.logoContainer}>
+           <View style={styles.logoWrapper}>
+              <Image 
+                source={require('../../assets/images/SimpleKhata-logo.png')} 
+                style={styles.iconImage}
+                resizeMode="contain" 
+              />
+           </View>
         </View>
 
-        <View style={styles.formCard}>
+        <Text style={styles.instructionText}>
+          {isLogin ? 'Please enter your login information' : "Let's create an account"}
+        </Text>
+
+        <View style={styles.formContainer}>
+          
+          <TextInput 
+            style={styles.underlineInput} 
+            placeholder="Email Address" 
+            placeholderTextColor="#CBD5E1"
+            value={email} 
+            onChangeText={setEmail} 
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
           {!isLogin && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Enter your full name" 
-                placeholderTextColor="#94A3B8"
-                value={displayName} 
-                onChangeText={setDisplayName} 
-              />
-            </View>
+            <TextInput 
+              style={styles.underlineInput} 
+              placeholder="Full Name" 
+              placeholderTextColor="#CBD5E1"
+              value={displayName} 
+              onChangeText={setDisplayName} 
+            />
           )}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
+          <View style={styles.passwordWrapper}>
             <TextInput 
-              style={styles.input} 
-              placeholder="name@email.com" 
-              placeholderTextColor="#94A3B8"
-              value={email} 
-              onChangeText={setEmail} 
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput 
-              style={styles.input} 
-              placeholder="••••••••" 
-              placeholderTextColor="#94A3B8"
+              style={[styles.underlineInput, { flex: 1, borderBottomWidth: 0, marginBottom: 0 }]} 
+              placeholder="Password" 
+              placeholderTextColor="#CBD5E1"
               value={password} 
               onChangeText={setPassword} 
-              secureTextEntry 
+              secureTextEntry={!showPwd}
             />
+            <TouchableOpacity onPress={() => setShowPwd(!showPwd)} style={styles.eyeIcon}>
+              <Ionicons name={showPwd ? "eye-off-outline" : "eye-outline"} size={20} color="#94A3B8" />
+            </TouchableOpacity>
           </View>
+          {!isLogin && <Text style={styles.hintText}>Must contain a number and least of 6 characters</Text>}
 
           {!isLogin && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Confirm Password</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="••••••••" 
-                placeholderTextColor="#94A3B8"
-                value={confirmPassword} 
-                onChangeText={setConfirmPassword} 
-                secureTextEntry 
-              />
-            </View>
+            <>
+              <View style={[styles.passwordWrapper, { marginTop: 0 }]}>
+                <TextInput 
+                  style={[styles.underlineInput, { flex: 1, borderBottomWidth: 0, marginBottom: 0 }]} 
+                  placeholder="Confirm Password" 
+                  placeholderTextColor="#CBD5E1"
+                  value={confirmPassword} 
+                  onChangeText={setConfirmPassword} 
+                  secureTextEntry={!showConfirmPwd}
+                />
+                <TouchableOpacity onPress={() => setShowConfirmPwd(!showConfirmPwd)} style={styles.eyeIcon}>
+                  <Ionicons name={showConfirmPwd ? "eye-off-outline" : "eye-outline"} size={20} color="#94A3B8" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.hintText}>Must contain a number and least of 6 characters</Text>
+            </>
           )}
 
           <TouchableOpacity 
-            style={[styles.primaryButton, isProcessing && { opacity: 0.7 }]} 
+            style={styles.mainActionBtn} 
             onPress={handleAuth}
             disabled={isProcessing}
           >
             {isProcessing ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Create Account'}</Text>
+              <Text style={styles.mainActionBtnText}>{isLogin ? 'Log In' : 'Sign Up'}</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={styles.switchTouch}>
-          <Text style={styles.switchText}>
-            {isLogin ? "New to Khata? Create an account" : "Already have an account? Sign in"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
+
+      {/* Footer Navigation */}
+      <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>
+            {isLogin ? "Don't have an account ? " : "Have an Account? "}
+          </Text>
+          <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+            <Text style={styles.footerLink}>{isLogin ? 'Sign Up' : 'Log in'}</Text>
+          </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 25, backgroundColor: '#F8FAFC', justifyContent: 'center', paddingTop: 60 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' },
-  headerSection: { alignItems: 'center', marginBottom: 30 },
-  iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  title: { fontSize: 24, fontWeight: '800', color: '#0F172A', textAlign: 'center' },
-  subtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', marginTop: 5, paddingHorizontal: 20 },
-  formCard: { backgroundColor: '#FFF', padding: 20, borderRadius: 20, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
-  inputGroup: { marginBottom: 15 },
-  label: { fontSize: 12, fontWeight: '700', color: '#475569', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: { backgroundColor: '#F1F5F9', padding: 15, borderRadius: 12, fontSize: 16, color: '#1E293B', borderWidth: 1, borderColor: '#E2E8F0' },
-  primaryButton: { backgroundColor: '#2563EB', padding: 18, borderRadius: 12, alignItems: 'center', marginTop: 10, shadowColor: '#2563EB', shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
-  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-  switchTouch: { marginTop: 25, padding: 10 },
-  switchText: { textAlign: 'center', color: '#2563EB', fontWeight: '700', fontSize: 14 }
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 45, paddingTop: 80, paddingBottom: 40, backgroundColor: '#FFF', justifyContent: 'center' },
+  
+  // Logo Styling
+  logoContainer: { alignItems: 'flex-start', marginBottom: 0 },
+  logoWrapper: { position: 'relative' },
+  iconImage: { width: 250, height: 140 },
+  
+  instructionText: { textAlign: 'left', color: '#CBD5E1', fontSize: 15, marginBottom: 40 },
+  
+  // Form Styling
+  formContainer: { width: '100%' },
+  underlineInput: { 
+    borderBottomWidth: 1.5, 
+    borderBottomColor: '#E2E8F0', 
+    paddingVertical: 8, 
+    fontSize: 16, 
+    color: '#334155', 
+    marginBottom: 10 
+  },
+  passwordWrapper: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    borderBottomWidth: 1.5, 
+    borderBottomColor: '#E2E8F0', 
+    marginBottom: 5 
+  },
+  eyeIcon: { padding: 10 },
+  hintText: { fontSize: 11, color: '#CBD5E1', marginBottom: 8 },
+
+  mainActionBtn: { 
+    backgroundColor: '#333344', 
+    padding: 12, 
+    borderRadius: 0, 
+    alignItems: 'center', 
+    marginTop: 30 
+  },
+  mainActionBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
+
+  // Footer Styling
+  footerContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 30,
+    marginTop: 20
+  },
+  footerText: { color: '#CBD5E1', fontSize: 14 },
+  footerLink: { color: '#333344', fontWeight: '900', fontSize: 15 }
 });
