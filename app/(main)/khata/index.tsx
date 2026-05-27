@@ -140,11 +140,7 @@ export default function KhataDashboard() {
         {/* Header Layout */}
         <View style={styles.headerSection}>
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../../assets/images/SimpleKhata-icon.png')} 
-              style={styles.iconImage}
-              resizeMode="contain" 
-            />
+            <Image source={require('../../../assets/images/SimpleKhata-icon.png')} style={styles.iconImage} resizeMode="contain" />
           </View>
           <View style={styles.headerTitles}>
             <Text style={styles.appTitle}>Welcome back, {user?.displayName || 'User'}</Text>
@@ -287,9 +283,9 @@ export default function KhataDashboard() {
 
 const styles = StyleSheet.create({
   centerClient: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' },
-  container: { flex: 1, paddingHorizontal: 30, backgroundColor: '#FFF' },
+  container: { flex: 1, paddingHorizontal: 25, backgroundColor: '#FFF' },
   
-  headerSection: { flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 25, gap: 15 },
+  headerSection: { flexDirection: 'row', alignItems: 'center', marginTop: 75, marginBottom: 25, gap: 15 },
   headerTitles: { flex: 1 },
   welcomeText: { fontSize: 20, fontWeight: '900', color: '#0F172A' },
   subtitleText: { fontSize: 13, color: '#64748B', marginTop: 2 },

@@ -11,7 +11,7 @@ import {
   Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -26,11 +26,7 @@ interface BillItem {
 const SplitterHeader = () => (
   <View style={styles.appHeader}>
     <View style={styles.logoContainer}>
-      <Image 
-        source={require('../../assets/images/SimpleKhata-icon.png')} 
-        style={styles.iconImage}
-        resizeMode="contain" 
-      />
+      <Image source={require('../../assets/images/SimpleKhata-icon.png')} style={styles.iconImage}resizeMode="contain" />
     </View>
     <View>
       <Text style={styles.appTitle}>Shared Expense Splitter</Text>
@@ -105,7 +101,7 @@ export default function BillSplitterPage() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={{ flex: 1, backgroundColor: '#F9F9F9' }}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
@@ -223,7 +219,7 @@ export default function BillSplitterPage() {
           )}
         </ScrollView>
       </ViewShot>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -232,7 +228,7 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 25, paddingBottom: 60 },
   
   // App Logo Header
-  appHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30, marginTop: 15, justifyContent: 'space-between' },
+  appHeader: { flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 30, marginTop: 50, justifyContent: 'space-between' },
   logoContainer: { justifyContent: 'center', alignItems: 'center', },
   iconImage: { width: 50, height: 50 },
   appTitle: { fontSize: 18, fontWeight: '900', color: '#334155', textAlign: 'right' },

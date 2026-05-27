@@ -89,11 +89,7 @@ export default function LoginPage() {
         {/* Logo Branding Section */}
         <View style={styles.logoContainer}>
            <View style={styles.logoWrapper}>
-              <Image 
-                source={require('../../assets/images/SimpleKhata-logo.png')} 
-                style={styles.iconImage}
-                resizeMode="contain" 
-              />
+              <Image source={require('../../assets/images/SimpleKhata-logo.png')} style={styles.iconImage} resizeMode="contain" />
            </View>
         </View>
 

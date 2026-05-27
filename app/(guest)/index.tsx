@@ -26,11 +26,7 @@ interface BillItem {
 const SplitterHeader = () => (
   <View style={styles.appHeader}>
     <View style={styles.logoContainer}>
-      <Image 
-        source={require('../../assets/images/SimpleKhata-icon.png')} 
-        style={styles.iconImage}
-        resizeMode="contain" 
-      />
+      <Image source={require('../../assets/images/SimpleKhata-icon.png')} style={styles.iconImage} resizeMode="contain" />
     </View>
     <View>
       <Text style={styles.appTitle}>Shared Expense Splitter</Text>

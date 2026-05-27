@@ -45,11 +45,7 @@ export default function SettingsIndex() {
       {/* Header Layout */}
       <View style={styles.headerSection}>
         <View style={styles.logoContainer}>
-          <Image 
-            source={require('../../../assets/images/SimpleKhata-icon.png')} 
-            style={styles.iconImage}
-            resizeMode="contain" 
-          />
+          <Image source={require('../../../assets/images/SimpleKhata-icon.png')} style={styles.iconImage} resizeMode="contain" />
         </View>
         <View style={styles.headerTitles}>
           <Text style={styles.appTitle}>Settings</Text>
@@ -120,7 +116,7 @@ function SettingsItem({ icon, title, sub, onPress }: SettingsItemProps) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === 'ios' ? 60 : 50,
     paddingHorizontal: 25,
     paddingBottom: 25,
     borderBottomWidth: 1,
@@ -141,7 +137,7 @@ const styles = StyleSheet.create({
     borderColor: '#F1F5F9',
   },
 
-  headerSection: { flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 25, gap: 15, paddingHorizontal: 25 },
+  headerSection: { flexDirection: 'row', alignItems: 'center', marginTop: 75, marginBottom: 25, gap: 15, paddingHorizontal: 25 },
   headerTitles: { flex: 1 },
   welcomeText: { fontSize: 20, fontWeight: '900', color: '#0F172A' },
   subtitleText: { fontSize: 13, color: '#64748B', marginTop: 2 },

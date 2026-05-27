@@ -14,11 +14,7 @@ export default function PrivacyPolicy() {
           <Ionicons name="arrow-back" size={20} color="#000" />
           <Text style={styles.backText}>Settings</Text>
         </TouchableOpacity>
-        <Image 
-          source={require('../../../assets/images/SimpleKhata-icon.png')} 
-          style={styles.headerIcon} 
-          resizeMode="contain"
-        />
+        <Image source={require('../../../assets/images/SimpleKhata-icon.png')} style={styles.headerIcon} resizeMode="contain" />
       </View>
 
       <ScrollView 

@@ -155,11 +155,7 @@ export default function AllTransactions() {
           <Ionicons name="arrow-back" size={20} color="#000" />
           <Text style={styles.backText}>Dashboard</Text>
         </TouchableOpacity>
-        <Image 
-          source={require('../../../assets/images/SimpleKhata-icon.png')} 
-          style={styles.headerIcon} 
-          resizeMode="contain"
-        />
+        <Image source={require('../../../assets/images/SimpleKhata-icon.png')} style={styles.headerIcon} resizeMode="contain" />
       </View>
 
       {/* Screen Interactive Head Controls */}
@@ -220,7 +216,7 @@ export default function AllTransactions() {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.fieldLabel}>Entry Type</Text>
+            {/* <Text style={styles.fieldLabel}>Entry Type</Text> */}
             <View style={styles.typeSelector}>
               <TouchableOpacity 
                 style={[styles.typeBtn, type === 'Income' ? styles.typeBtnActive : styles.typeBtnInactive]} 
@@ -287,7 +283,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF', paddingHorizontal: 30 },
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   
-  header: { marginTop: 50, marginBottom: 25, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  header: { marginTop: 75, marginBottom: 25, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   backBtnRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   backText: { fontSize: 14, fontWeight: '700', color: '#0F172A' },
   headerIcon: { width: 44, height: 44 },
@@ -297,7 +293,7 @@ const styles = StyleSheet.create({
   addBtnSmall: { backgroundColor: '#333344', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 5 },
   addBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 },
 
-  tCard: { backgroundColor: '#FFF', padding: 20, borderRadius: 18, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 15, elevation: 2 },
+  tCard: { backgroundColor: '#FFF', padding: 20, borderRadius: 18, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: '#f2f2f2' },
   tCardTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
   tCardMeta: { fontSize: 12, color: '#94A3B8', marginTop: 3 },
   tCardAmount: { fontSize: 15, fontWeight: '900' },
@@ -314,7 +310,7 @@ const styles = StyleSheet.create({
   
   fieldLabel: { fontSize: 13, color: '#334155', fontWeight: '700', marginBottom: 8 },
   
-  typeSelector: { flexDirection: 'row', borderWidth: 1.5, borderColor: '#333344', borderRadius: 4, overflow: 'hidden', marginBottom: 25 },
+  typeSelector: { flexDirection: 'row', borderWidth: 1, borderColor: '#333344', borderRadius: 4, overflow: 'hidden', marginBottom: 25 },
   typeBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
   typeBtnInactive: { backgroundColor: '#FFF' },
   typeBtnActive: { backgroundColor: '#333344' },
